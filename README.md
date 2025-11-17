@@ -1,2 +1,2 @@
-# data_generation
+# Data Generation
 LLM-based data generation.
