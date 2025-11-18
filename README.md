@@ -1,4 +1,4 @@
-# Data Generation
+# LLM-driven Data Generation
 
 ## Overview
 This repository contains scripts and processes for LLM-driven data generation. It relies on vLLM as inference engine. 
@@ -8,8 +8,8 @@ Currently supported functionality:
 ## Setup
 Install:
 ```bash
-git clone https://github.com/dreichCSL/data_generation.git
-cd data_generation/
+git clone https://github.com/dreichCSL/LLM_Data_Generation.git
+cd llm_data_generation/
 pip install -e .[gpu]
 ```
 
