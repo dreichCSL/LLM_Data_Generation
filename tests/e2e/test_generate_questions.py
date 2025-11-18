@@ -2,10 +2,11 @@ import pytest
 import json
 from pathlib import Path
 import tempfile
-from data_generation.wrappers.llm_generator_wrappers import generate_questions
 
 @pytest.mark.gpu
 def test_generate_questions():
+    from data_generation.wrappers.llm_generator_wrappers import generate_questions
+    
     with tempfile.TemporaryDirectory() as tmp_dir:
         generate_questions(config_yaml='tests/data/sample_config.yaml', output_dir=tmp_dir)
 
