@@ -20,10 +20,10 @@ def test_llm_response_processor_by_type(text_type):
                     """)
 
         question_list = llm_response_processor(text)
-        assert type(question_list) == list
-        assert len(question_list) == 4
-        assert question_list[0].endswith("?")
-        assert all(q for q in question_list)  # no empty strings
+        assert isinstance(question_list, list)
+        assert len(question_list) == 4, "should extract 4 question from this text"
+        assert all(q for q in question_list), "no empty strings"
+        assert all(q.endswith("?") for q in question_list), "Ends with question mark"
 
     if text_type == 'statements':
         text = dedent("""Assistant: 
@@ -36,10 +36,10 @@ def test_llm_response_processor_by_type(text_type):
                     Any more statements, let me know.
                     """)
         statement_list = llm_response_processor(text)
-        assert type(statement_list) == list
-        assert len(statement_list) == 4
-        assert statement_list[0].endswith(".")
-        assert all(q for q in statement_list)  # no empty strings
+        assert isinstance(statement_list, list)
+        assert len(statement_list) == 4, "should extract 4 statements from this text"
+        assert all(s for s in statement_list), "no empty strings"
+        assert all(s.endswith(".") for s in statement_list), "Ends with period"
 
     if text_type == 'answer':
         for text in ["Assistant: The answer to the question.\n",
@@ -47,7 +47,7 @@ def test_llm_response_processor_by_type(text_type):
                      "antwort:\nDie Antwort.",
                      "The answer to the question.\n"]:
             answer = llm_response_processor(text)
-            assert type(answer) == str
+            assert isinstance(answer, str)
             assert answer.endswith(".")
             assert len(text) > len(answer) > 1
     
@@ -57,6 +57,6 @@ def test_llm_response_processor_by_type(text_type):
                      "Rating:\n3",
                      "my rating: 2.\n"]:
             rating = llm_response_processor(text)
-            assert type(rating) == str
+            assert isinstance(rating, str)
             assert rating.isdigit()
             assert len(rating) == 1
