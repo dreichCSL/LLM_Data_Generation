@@ -1,6 +1,8 @@
+import pytest
 from data_generation.conf.config import load_config
 
-def test_config(sample_config):
-    load_config(sample_config)
-
-    # load_config('tests/data/sample_config.yaml')
+@pytest.mark.parametrize("config_type", 
+                         ["sample_config_questions", 
+                          "sample_config_answers"])
+def test_config(config_type, request):
+    load_config(request.getfixturevalue(config_type))

@@ -1,0 +1,23 @@
+input_paths:
+  prompt_dir: data_generation/prompts
+  context_file: tests/data/sample_context.jsonl
+llm_gen_config:
+  model_setup:
+    use_cloud: False
+    model_name: meta-llama/Llama-3.2-1B-Instruct
+    prompts:
+      user_prompt: user_prompts/gen_questions_en.jinja2
+      system_prompt: system_prompts/gen_qa.jinja2
+      chat_template: chat_templates/Llama-3.1-8B-Instruct.jinja2
+  inference_config:
+    batch_size: 8
+    batch_size_dl: 96
+    llm_sampling_params:
+      max_tokens: 384
+      temperature: 0.95
+      top_p: 0.85
+      skip_special_tokens: True
+    vllm_engine_params:
+      max_seq_len_to_capture: 8192
+      max_model_len: 8192
+      tensor_parallel_size: 1

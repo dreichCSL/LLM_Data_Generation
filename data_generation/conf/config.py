@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
-from jinja2 import Environment, FileSystemLoader, Template
+from jinja2 import Environment, FileSystemLoader, Template, StrictUndefined
 import yaml, pathlib
 
 class BaseConfig(BaseModel):
@@ -36,16 +36,20 @@ class ModelSetup(BaseConfig):
     prompts: Prompts
     prompt_templates: Optional[PromptTemplates] = None
 
-class LLMGenConfig(BaseConfig):
-    model_setup: ModelSetup
+class InferenceConfig(BaseConfig):
     batch_size: int = 16   # in vLLM: # of parallel processing "lanes"
     batch_size_dl: int = 128  # samples passed to vLLM (should be gt batch_size)
     llm_sampling_params: LLMSamplingParams = LLMSamplingParams()
     vllm_engine_params: VLLMEngineParams = VLLMEngineParams()
 
+class LLMGenConfig(BaseConfig):
+    model_setup: ModelSetup
+    inference_config: InferenceConfig
+
 class InputPaths(BaseConfig):
     prompt_dir: str = "data_generation/prompts"
     context_file: str = ""
+    discourse_file: str = ""
 
 class AppConfig(BaseConfig):
     input_paths: InputPaths
@@ -55,12 +59,18 @@ def load_config(path: str) -> AppConfig:
     data = yaml.safe_load(pathlib.Path(path).read_text())
     cfg = AppConfig.model_validate(data)
     # set additional vllm parameter
-    cfg.llm_gen_config.vllm_engine_params.compilation_config = \
-        {"cudagraph_capture_sizes": [cfg.llm_gen_config.batch_size]}
-    # load jinja2 templates
-    env = Environment(loader=FileSystemLoader(cfg.input_paths.prompt_dir))
-    prompt_templates = PromptTemplates(
-        **{k: env.get_template(v) for k,v in 
-         vars(cfg.llm_gen_config.model_setup.prompts).items()})
-    cfg.llm_gen_config.model_setup.prompt_templates = prompt_templates
+    cfg.llm_gen_config.inference_config.vllm_engine_params.compilation_config = \
+        {"cudagraph_capture_sizes": [cfg.llm_gen_config.inference_config.batch_size]}
+    # load jinja2 templates; 
+    # note: require all non-terminals in template to be rendered (except for chat_template)
+    env_strict = Environment(loader=FileSystemLoader(cfg.input_paths.prompt_dir), 
+                      undefined=StrictUndefined)
+    # not required for chat_template
+    env_loose = Environment(loader=FileSystemLoader(cfg.input_paths.prompt_dir))
+    template_dict = {k: env_strict.get_template(v) for k,v in 
+         vars(cfg.llm_gen_config.model_setup.prompts).items() if k not in "chat_template"}
+    template_dict['chat_template'] = \
+        env_loose.get_template(cfg.llm_gen_config.model_setup.prompts.chat_template)
+    # set as prompt_templates
+    cfg.llm_gen_config.model_setup.prompt_templates = PromptTemplates(**template_dict)
     return cfg

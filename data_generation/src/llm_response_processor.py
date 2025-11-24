@@ -33,15 +33,16 @@ def _(response_text: str) -> List[str]:
         if (match := question_pattern.match(line))
     ]
 
-@LLMResponseProcessorRegistry.register('statements')
-def _(response_text: str) -> List[str]:
-    """Extract numbered statements from text."""
-    statement_pattern = re.compile(r'^\s*(?:[\d\.\)\-•]+\s*)(?P<statement>.+\.)\s*$')
-    return [
-        match.group('statement').strip()
-        for line in response_text.splitlines()
-        if (match := statement_pattern.match(line))
-    ]
+# TODO: add this
+# @LLMResponseProcessorRegistry.register('statements')
+# def _(response_text: str) -> List[str]:
+#     """Extract numbered statements from text."""
+#     statement_pattern = re.compile(r'^\s*(?:[\d\.\)\-•]+\s*)(?P<statement>.+\.)\s*$')
+#     return [
+#         match.group('statement').strip()
+#         for line in response_text.splitlines()
+#         if (match := statement_pattern.match(line))
+#     ]
 
 @LLMResponseProcessorRegistry.register('answer')
 def _(response_text: str) -> str:
@@ -50,9 +51,10 @@ def _(response_text: str) -> str:
     response_text = prefix_cleaner.sub('', response_text, count=1)
     return response_text.strip()
 
-@LLMResponseProcessorRegistry.register('rating')
-def _(response_text: str) -> str:
-    """Extract a numeric rating (0–9) from rating text."""
-    qrating_pattern = re.compile(r'(?:^assistant[\s:]*|rating[\s:]*)(\d)\b', re.IGNORECASE)
-    match = qrating_pattern.search(response_text)
-    return match.group(1) if match else response_text.strip()
+# TODO: add this
+# @LLMResponseProcessorRegistry.register('rating')
+# def _(response_text: str) -> str:
+#     """Extract a numeric rating (0–9) from rating text."""
+#     qrating_pattern = re.compile(r'(?:^assistant[\s:]*|rating[\s:]*)(\d)\b', re.IGNORECASE)
+#     match = qrating_pattern.search(response_text)
+#     return match.group(1) if match else response_text.strip()

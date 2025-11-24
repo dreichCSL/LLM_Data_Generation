@@ -100,8 +100,16 @@ class LocalLLMGenerator(LLMGenerator):
         response_dicts = []
         for idx, r in enumerate(responses):
             resp = r.outputs[0].text.strip()
-            resp_dict = {"resp": self.gen_specs.llm_response_processor(resp), 
-                         "sample_id": sample_ids[idx]}
+            processed_resp = self.gen_specs.llm_response_processor(resp)
+            if isinstance(processed_resp, list):
+                # if a list of items were generated
+                for item_idx, item in enumerate(processed_resp):
+                    resp_dict = {"resp": item, 
+                                "sample_id": "_".join([sample_ids[idx], str(item_idx).rjust(4, '0')])}
+            else:
+                # if only single item was generated
+                resp_dict = {"resp": processed_resp, 
+                            "sample_id": sample_ids[idx]}
             response_dicts.append(resp_dict)
         return response_dicts
 
